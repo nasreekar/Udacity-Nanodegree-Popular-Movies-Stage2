@@ -122,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void getFavoriteMovies() {
+        //TODO load the data from database
+    }
+
     private void generateMovieList(final List<Movie> results) {
         CustomMoviesAdapter adapter = new CustomMoviesAdapter(this, results, new CustomMoviesAdapter.MovieItemClickListener() {
             @Override
@@ -160,6 +164,11 @@ public class MainActivity extends AppCompatActivity {
             case R.id.popular:
                 getPopularMovies();
                 setTitle(R.string.popular_movies);
+                break;
+
+            case R.id.favorite:
+                getFavoriteMovies();
+                setTitle(R.string.favorite_movies);
                 break;
         }
         return super.onOptionsItemSelected(item);

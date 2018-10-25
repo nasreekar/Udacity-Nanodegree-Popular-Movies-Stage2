@@ -13,4 +13,11 @@
         android:visible="true"
         android:orderInCategory="2"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/favorite"
+        android:title="@string/favorite_movies"
+        android:visible="true"
+        android:orderInCategory="3"
+        app:showAsAction="never" />
 </menu>
