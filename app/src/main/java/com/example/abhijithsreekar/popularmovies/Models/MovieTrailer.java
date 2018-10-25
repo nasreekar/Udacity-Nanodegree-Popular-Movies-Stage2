@@ -1,38 +1,48 @@
 package com.example.abhijithsreekar.popularmovies.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class MovieTrailer {
-
-    @SerializedName("id")
-    private long id;
+public class MovieTrailer implements Parcelable {
 
     @SerializedName("results")
-    private ArrayList<Trailer> results;
+    private List<Trailer> Trailers;
 
-    public MovieTrailer() {
+    public MovieTrailer(List<Trailer> Trailers) {
+        this.Trailers = Trailers;
     }
 
-    public MovieTrailer(long id, ArrayList<Trailer> results) {
-        this.id = id;
-        this.results = results;
+    public MovieTrailer(Parcel parcel) {
+        parcel.readTypedList(Trailers, Trailer.CREATOR);
     }
 
-    public long getId() {
-        return id;
+    public List<Trailer> getTrailers() {
+        return Trailers;
     }
 
-    public ArrayList<Trailer> getResults() {
-        return results;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeTypedList(Trailers);
     }
 
-    public void setResults(ArrayList<Trailer> results) {
-        this.results = results;
-    }
+    public static final Creator<MovieTrailer> CREATOR = new Creator<MovieTrailer>() {
+        @Override
+        public MovieTrailer createFromParcel(Parcel parcel) {
+            return new MovieTrailer(parcel);
+        }
+
+        @Override
+        public MovieTrailer[] newArray(int i) {
+            return new MovieTrailer[i];
+        }
+    };
 }

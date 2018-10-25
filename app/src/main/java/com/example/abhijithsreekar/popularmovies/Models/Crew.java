@@ -2,22 +2,22 @@ package com.example.abhijithsreekar.popularmovies.Models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Cast {
+public class Crew {
     @SerializedName("name")
     private String name;
-    @SerializedName("profile_path")
-    private String profileUrl;
+    @SerializedName("job")
+    private String job;
 
-    public Cast(String name, String profileUrl) {
+    public Crew(String name, String job) {
         this.name = name;
-        this.profileUrl = profileUrl;
+        this.job = job;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getProfileUrl() {
-        return profileUrl;
+    public String getJob() {
+        return job;
     }
 }

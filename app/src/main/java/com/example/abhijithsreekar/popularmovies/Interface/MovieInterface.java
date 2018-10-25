@@ -1,10 +1,9 @@
 package com.example.abhijithsreekar.popularmovies.Interface;
 
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
-import com.example.abhijithsreekar.popularmovies.Models.MovieCasting;
+import com.example.abhijithsreekar.popularmovies.Models.MovieCredits;
 import com.example.abhijithsreekar.popularmovies.Models.MovieResponse;
 import com.example.abhijithsreekar.popularmovies.Models.MovieReviews;
-import com.example.abhijithsreekar.popularmovies.Models.MovieTrailer;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -21,16 +20,16 @@ public interface MovieInterface {
     Call<MovieResponse> getPopularMovies(@Query("api_key") String apiKey, @Query("language") String language,
                                          @Query("page") int page);
 
-    @GET("movie/{id}?api_key=")
-    Call<Movie> getMovie(@Path("id") long id);
+    @GET("movie/{movie_id}/credits")
+    Call<MovieCredits> getMovieCredits (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
 
-    @GET("movie/{id}/videos?api_key=")
-    Call<MovieTrailer> getMovieTrailers(@Path("id") long id);
+    @GET("movie/{movie_id}/reviews")
+    Call<MovieReviews> getMovieReviews (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
 
-    @GET("movie/{id}/reviews?api_key=")
-    Call<MovieReviews> getMovieReviews(@Path("id") long id);
+    @GET("movie/{movie_id}")
+    Call<Movie> getMovieDetails (@Path("movie_id") int movieId, @Query("api_key") String apiKey, @Query("append_to_response") String append_to_response);
 
-    @GET("movie/{id}/credits?api_key=")
-    Call<MovieCasting> getMovieCasting(@Path("id") long id);
+    @GET("movie/{movie_id}")
+    Call<Movie> getMovieDetails (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
 }
 

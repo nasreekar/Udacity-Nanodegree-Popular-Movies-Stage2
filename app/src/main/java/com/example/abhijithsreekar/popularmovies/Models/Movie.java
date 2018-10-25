@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+
 public class Movie implements Parcelable {
 
     @SerializedName("poster_path")
@@ -25,7 +26,7 @@ public class Movie implements Parcelable {
     private List<Integer> genreIds;
 
     @SerializedName("id")
-    private Integer id;
+    private Integer movieId;
 
     @SerializedName("original_title")
     private String originalTitle;
@@ -51,7 +52,11 @@ public class Movie implements Parcelable {
     @SerializedName("vote_average")
     private Double voteAverage;
 
-    public Movie(String posterPath, boolean adult, String overview, String releaseDate, List<Integer> genreIds, Integer id,
+    @SerializedName("videos")
+    private MovieTrailer MovieTrailer;
+
+
+    public Movie(String posterPath, boolean adult, String overview, String releaseDate, List<Integer> genreIds, Integer movieId,
                  String originalTitle, String originalLanguage, String title, String backdropPath, Double popularity,
                  Integer voteCount, Boolean video, Double voteAverage) {
         this.posterPath = posterPath;
@@ -59,7 +64,7 @@ public class Movie implements Parcelable {
         this.overview = overview;
         this.releaseDate = releaseDate;
         this.genreIds = genreIds;
-        this.id = id;
+        this.movieId = movieId;
         this.originalTitle = originalTitle;
         this.originalLanguage = originalLanguage;
         this.title = title;
@@ -111,11 +116,11 @@ public class Movie implements Parcelable {
     }
 
     public Integer getId() {
-        return id;
+        return movieId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setId(Integer movieId) {
+        this.movieId = movieId;
     }
 
     public String getOriginalTitle() {
@@ -182,6 +187,10 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
+    public MovieTrailer getMovieTrailer() { return MovieTrailer; }
+
+    public void setMovieTrailer(MovieTrailer MovieTrailer) { this.MovieTrailer = MovieTrailer; }
+
     @Override
     public int describeContents() {
         return 0;
@@ -189,6 +198,7 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(movieId);
         dest.writeString(posterPath);
         dest.writeString(overview);
         dest.writeString(releaseDate);
@@ -197,9 +207,11 @@ public class Movie implements Parcelable {
         dest.writeString(title);
         dest.writeDouble(voteAverage);
         dest.writeString(backdropPath);
+        dest.writeParcelable(MovieTrailer, 0);
     }
 
     private Movie(Parcel in){
+        this.movieId =  in.readInt();
         this.posterPath = in.readString();
         this.overview = in.readString();
         this.releaseDate = in.readString();
@@ -208,6 +220,7 @@ public class Movie implements Parcelable {
         this.title = in.readString();
         this.voteAverage = in.readDouble();
         this.backdropPath = in.readString();
+        this.MovieTrailer = in.readParcelable(MovieTrailer.class.getClassLoader());
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {

@@ -4,16 +4,16 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
-public class MovieCasting {
+public class MovieCredits {
     @SerializedName("id")
     private long id;
 
     @SerializedName("cast")
     private ArrayList<Cast> cast;
 
-    public MovieCasting() {}
+    public MovieCredits() {}
 
-    public MovieCasting(long id, ArrayList<Cast> cast) {
+    public MovieCredits(long id, ArrayList<Cast> cast) {
         this.id = id;
         this.cast = cast;
     }

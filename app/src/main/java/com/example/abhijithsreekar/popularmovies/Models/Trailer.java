@@ -1,81 +1,65 @@
 package com.example.abhijithsreekar.popularmovies.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Trailer {
+public class Trailer implements Parcelable {
 
-    @SerializedName("id")
-    private String strId;
     @SerializedName("key")
     private String key;
-    @SerializedName("name")
-    private String name;
     @SerializedName("site")
     private String site;
-    @SerializedName("size")
-    private int size;
-    @SerializedName("type")
-    private String type;
+    @SerializedName("name")
+    private String title;
 
-
-    public Trailer() {}
-
-    public Trailer(String strId, String key, String name, String site, int size, String type, long movieVideosId) {
-        this.strId = strId;
+    public Trailer(String key, String site, String title) {
         this.key = key;
-        this.name = name;
         this.site = site;
-        this.size = size;
-        this.type = type;
+        this.title = title;
     }
 
-
-    public String getStrId() {
-        return strId;
-    }
-
-    public void setStrId(String strId) {
-        this.strId = strId;
+    public Trailer(Parcel parcel) {
+        key = parcel.readString();
+        site = parcel.readString();
+        title = parcel.readString();
     }
 
     public String getKey() {
         return key;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getSite() {
         return site;
     }
 
-    public void setSite(String site) {
-        this.site = site;
+    public String getTitle() {
+        return title;
     }
 
-    public int getSize() {
-        return size;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(key);
+        parcel.writeString(site);
+        parcel.writeString(title);
     }
 
-    public String getType() {
-        return type;
-    }
+    public static final Creator<Trailer> CREATOR = new Creator<Trailer>() {
+        @Override
+        public Trailer createFromParcel(Parcel parcel) {
+            return new Trailer(parcel);
+        }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+        @Override
+        public Trailer[] newArray(int i) {
+            return new Trailer[i];
+        }
+    };
 
 }
