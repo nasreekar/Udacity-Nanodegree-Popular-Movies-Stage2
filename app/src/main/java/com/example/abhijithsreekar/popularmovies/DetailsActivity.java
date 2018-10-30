@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +72,18 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.rv_cast)
     public RecyclerView rvCast;
 
+    @BindView(R.id.tv_plot_not_available)
+    TextView plotNotAvailable;
+
+    @BindView(R.id.tv_cast_not_available)
+    TextView castNotAvailable;
+
+    @BindView(R.id.tv_trailers_not_available)
+    TextView trailersNotAvailable;
+
+    @BindView(R.id.tv_reviews_not_available)
+    TextView reviewsNotAvailable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,7 +105,11 @@ public class DetailsActivity extends AppCompatActivity {
 
         movieTitle.setText(selectedMovie.getTitle());
         movieLanguage.setText(new StringBuilder("Language: ").append(selectedMovie.getOriginalLanguage()));
-        moviePlot.setText(selectedMovie.getOverview());
+        if (selectedMovie.getOverview() != null && !selectedMovie.getOverview().isEmpty()) {
+            moviePlot.setText(selectedMovie.getOverview());
+        } else {
+            toggleNoPlotSynopsisMessage();
+        }
         movieReleaseDate.setText(new StringBuilder("Release Date: ").append(selectedMovie.getReleaseDate()));
         movieVoteAverage.setText(new StringBuilder("Rating: ").append(selectedMovie.getVoteAverage()));
 
@@ -116,11 +133,10 @@ public class DetailsActivity extends AppCompatActivity {
                 public void onResponse(@NonNull Call<MovieCredits> call, @NonNull Response<MovieCredits> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         cast = response.body().getCast();
-                        if (trailers != null) {
+                        if (trailers != null && !trailers.isEmpty()) {
                             generateCreditsList(cast);
-                        }
-                        else {
-                            toggleNoTrailerMessage();
+                        } else {
+                            toggleNoCastMessage();
                         }
                     }
                 }
@@ -141,17 +157,16 @@ public class DetailsActivity extends AppCompatActivity {
                 retrofit = APIClient.getRetrofitInstance();
             }
             MovieInterface movieService = retrofit.create(MovieInterface.class);
-            Call<MovieReviews> call = movieService.getMovieReviews(id, API_KEY,1);
+            Call<MovieReviews> call = movieService.getMovieReviews(id, API_KEY, 1);
             call.enqueue(new Callback<MovieReviews>() {
                 @Override
                 public void onResponse(@NonNull Call<MovieReviews> call, @NonNull Response<MovieReviews> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         reviews = response.body().getReviewList();
-                        if (reviews != null) {
+                        if (reviews != null && !reviews.isEmpty()) {
                             generateReviewList(reviews);
-                        }
-                        else {
-                            toggleNoTrailerMessage();
+                        } else {
+                            toggleNoReviewsMessage();
                         }
                     }
                 }
@@ -178,10 +193,9 @@ public class DetailsActivity extends AppCompatActivity {
                 public void onResponse(@NonNull Call<MovieTrailer> call, @NonNull Response<MovieTrailer> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         trailers = response.body().getTrailers();
-                        if (trailers != null) {
+                        if (trailers != null && !trailers.isEmpty()) {
                             generateTrailerList(trailers);
-                        }
-                        else {
+                        } else {
                             toggleNoTrailerMessage();
                         }
                     }
@@ -228,6 +242,58 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void toggleNoTrailerMessage() {
+        if (trailersNotAvailable.getVisibility() == View.GONE) {
+            trailersNotAvailable.setVisibility(View.VISIBLE);
+        } else {
+            trailersNotAvailable.setVisibility(View.GONE);
+        }
 
+        if (rvTrailer.getVisibility() == View.VISIBLE) {
+            rvTrailer.setVisibility(View.GONE);
+        } else {
+            rvTrailer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleNoCastMessage() {
+        if (castNotAvailable.getVisibility() == View.GONE) {
+            castNotAvailable.setVisibility(View.VISIBLE);
+        } else {
+            castNotAvailable.setVisibility(View.GONE);
+        }
+
+        if (rvCast.getVisibility() == View.VISIBLE) {
+            rvCast.setVisibility(View.GONE);
+        } else {
+            rvCast.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleNoReviewsMessage() {
+        if (reviewsNotAvailable.getVisibility() == View.GONE) {
+            reviewsNotAvailable.setVisibility(View.VISIBLE);
+        } else {
+            reviewsNotAvailable.setVisibility(View.GONE);
+        }
+
+        if (rvReviews.getVisibility() == View.VISIBLE) {
+            rvReviews.setVisibility(View.GONE);
+        } else {
+            rvReviews.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleNoPlotSynopsisMessage() {
+        if (plotNotAvailable.getVisibility() == View.GONE) {
+            plotNotAvailable.setVisibility(View.VISIBLE);
+        } else {
+            plotNotAvailable.setVisibility(View.GONE);
+        }
+
+        if (moviePlot.getVisibility() == View.VISIBLE) {
+            moviePlot.setVisibility(View.GONE);
+        } else {
+            moviePlot.setVisibility(View.VISIBLE);
+        }
     }
 }

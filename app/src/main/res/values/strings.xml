@@ -13,4 +13,8 @@
     <string name="no_description_available">No description available</string>
     <string name="reviews">Reviews :</string>
     <string name="cast">Cast :</string>
+    <string name="castNotAvailable">Cast Not Found</string>
+    <string name="trailerNotAvailable">Trailers Not Available</string>
+    <string name="reviewsNotAvailable">Reviews Not Available</string>
+    <string name="plotNotAvailable">Plot Synopsis Not Available</string>
 </resources>

@@ -19,9 +19,7 @@ public class Cast {
         return name;
     }
 
-    public String getCharacter() {
-        return character;
-    }
+    public String getCharacter() { return character; }
 
     public String getProfileUrl() {
         return profileUrl;

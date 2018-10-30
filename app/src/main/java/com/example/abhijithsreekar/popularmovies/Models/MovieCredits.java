@@ -11,8 +11,6 @@ public class MovieCredits {
     @SerializedName("cast")
     private ArrayList<Cast> cast;
 
-    public MovieCredits() {}
-
     public MovieCredits(long id, ArrayList<Cast> cast) {
         this.id = id;
         this.cast = cast;

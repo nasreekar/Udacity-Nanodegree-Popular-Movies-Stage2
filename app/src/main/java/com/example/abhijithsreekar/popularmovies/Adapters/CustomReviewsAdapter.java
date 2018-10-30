@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.abhijithsreekar.popularmovies.Models.Reviews;
@@ -34,10 +35,18 @@ public class CustomReviewsAdapter extends RecyclerView.Adapter<CustomReviewsAdap
 
     @Override
     public void onBindViewHolder(@NonNull final MovieReviewViewHolder holder, int position) {
-        Reviews review = reviewList.get(position);
+        final Reviews review = reviewList.get(position);
+        holder.bindReview(reviewList.get(position));
 
-        holder.author.setText(review.getAuthor());
-        holder.content.setText(review.getContent());
+        holder.itemView.setOnClickListener(v -> {
+            // Get the current state of the item
+            boolean expanded = review.isExpanded();
+            // Change the state
+            review.setExpanded(!expanded);
+            // Notify the adapter that item has changed
+            notifyItemChanged(position);
+        });
+
     }
 
     @Override
@@ -51,10 +60,19 @@ public class CustomReviewsAdapter extends RecyclerView.Adapter<CustomReviewsAdap
         TextView author;
         @BindView(R.id.tv_content)
         TextView content;
+        @BindView(R.id.sub_item)
+        LinearLayout subItem;
 
         MovieReviewViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+
+        void bindReview(Reviews review) {
+            boolean expanded = review.isExpanded();
+            subItem.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            author.setText(review.getAuthor());
+            content.setText(review.getContent());
         }
     }
 }

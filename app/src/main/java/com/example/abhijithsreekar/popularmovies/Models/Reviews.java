@@ -9,6 +9,8 @@ public class Reviews {
     @SerializedName("content")
     private String content;
 
+    private boolean expanded;
+
     public Reviews(String author, String content) {
         this.author = author;
         this.content = content;
@@ -22,4 +24,11 @@ public class Reviews {
         return content;
     }
 
+    public boolean isExpanded() {
+        return expanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
 }
