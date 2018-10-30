@@ -7,6 +7,8 @@ public class Cast {
     private String name;
     @SerializedName("profile_path")
     private String profileUrl;
+    @SerializedName("character")
+    private String character;
 
     public Cast(String name, String profileUrl) {
         this.name = name;
@@ -15,6 +17,10 @@ public class Cast {
 
     public String getName() {
         return name;
+    }
+
+    public String getCharacter() {
+        return character;
     }
 
     public String getProfileUrl() {

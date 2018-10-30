@@ -11,10 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.abhijithsreekar.popularmovies.Adapters.CustomCastAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomReviewsAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomTrailerAdapter;
 import com.example.abhijithsreekar.popularmovies.Interface.MovieInterface;
+import com.example.abhijithsreekar.popularmovies.Models.Cast;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
+import com.example.abhijithsreekar.popularmovies.Models.MovieCredits;
 import com.example.abhijithsreekar.popularmovies.Models.MovieReviews;
 import com.example.abhijithsreekar.popularmovies.Models.MovieTrailer;
 import com.example.abhijithsreekar.popularmovies.Models.Reviews;
@@ -39,6 +42,7 @@ public class DetailsActivity extends AppCompatActivity {
     private static String API_KEY;
     public List<Trailer> trailers;
     public List<Reviews> reviews;
+    public List<Cast> cast;
 
     @BindView(R.id.iv_details_moviePoster)
     ImageView moviePoster;
@@ -64,6 +68,9 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.rv_reviews)
     public RecyclerView rvReviews;
 
+    @BindView(R.id.rv_cast)
+    public RecyclerView rvCast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +88,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         getMovieTrailers(selectedMovie.getId());
         getMovieReviews(selectedMovie.getId());
+        getMovieCast(selectedMovie.getId());
+
         movieTitle.setText(selectedMovie.getTitle());
         movieLanguage.setText(new StringBuilder("Language: ").append(selectedMovie.getOriginalLanguage()));
         moviePlot.setText(selectedMovie.getOverview());
@@ -93,6 +102,37 @@ public class DetailsActivity extends AppCompatActivity {
                 .placeholder((R.drawable.gradient_background))
                 .error(R.drawable.ic_launcher_background)
                 .into(moviePoster);
+    }
+
+    private void getMovieCast(Integer id) {
+        if (MovieUtils.getInstance().isNetworkAvailable(this)) {
+            if (retrofit == null) {
+                retrofit = APIClient.getRetrofitInstance();
+            }
+            MovieInterface movieService = retrofit.create(MovieInterface.class);
+            Call<MovieCredits> call = movieService.getMovieCredits(id, API_KEY);
+            call.enqueue(new Callback<MovieCredits>() {
+                @Override
+                public void onResponse(@NonNull Call<MovieCredits> call, @NonNull Response<MovieCredits> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        cast = response.body().getCast();
+                        if (trailers != null) {
+                            generateCreditsList(cast);
+                        }
+                        else {
+                            toggleNoTrailerMessage();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<MovieCredits> call, Throwable t) {
+                    Toast.makeText(DetailsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.i("Network Connection Status", "Not available");
+        }
     }
 
     private void getMovieReviews(Integer id) {
@@ -157,6 +197,11 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+    private void generateCreditsList(List<Cast> cast) {
+        CustomCastAdapter adapter = new CustomCastAdapter(this, cast);
+        initCastAdapter(adapter);
+    }
+
     private void generateReviewList(final List<Reviews> reviews) {
         CustomReviewsAdapter adapter = new CustomReviewsAdapter(this, reviews);
         initReviewsAdapter(adapter);
@@ -165,6 +210,11 @@ public class DetailsActivity extends AppCompatActivity {
     private void generateTrailerList(final List<Trailer> trailers) {
         CustomTrailerAdapter adapter = new CustomTrailerAdapter(this, trailers);
         initTrailersAdapter(adapter);
+    }
+
+    private void initCastAdapter(CustomCastAdapter adapter) {
+        rvCast.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvCast.setAdapter(adapter);
     }
 
     private void initReviewsAdapter(CustomReviewsAdapter adapter) {

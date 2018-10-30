@@ -12,4 +12,5 @@
     <string name="favorite_movies">Favorite Movies</string>
     <string name="no_description_available">No description available</string>
     <string name="reviews">Reviews :</string>
+    <string name="cast">Cast :</string>
 </resources>
