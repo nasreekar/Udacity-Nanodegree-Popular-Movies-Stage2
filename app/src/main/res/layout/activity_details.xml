@@ -24,8 +24,8 @@
             style="@style/FancyLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="20dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,8 +44,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 tools:text="@string/divider" />
 
             <TextView
@@ -57,8 +57,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 tools:text="@string/divider" />
 
             <TextView
@@ -74,8 +74,8 @@
             style="@style/DetailsPlotHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_marginStart="10dp"
+            android:layout_marginBottom="10dp"
             android:text="@string/plotAnalysis" />
 
         <TextView
@@ -83,16 +83,16 @@
             style="@style/BodySmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="20dp" />
 
         <TextView
             android:id="@+id/tv_trailers_heading"
             style="@style/DetailsPlotHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_marginStart="10dp"
+            android:layout_marginBottom="10dp"
             android:text="@string/trailers" />
 
         <android.support.v7.widget.RecyclerView
@@ -100,9 +100,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal" />
 
-        </android.support.v7.widget.RecyclerView>
+        <TextView
+            android:id="@+id/tv_reviews_heading"
+            style="@style/DetailsPlotHeading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="@string/reviews" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal" />
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

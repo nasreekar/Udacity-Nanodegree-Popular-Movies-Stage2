@@ -3,6 +3,7 @@ package com.example.abhijithsreekar.popularmovies.Models;
 import com.google.gson.annotations.SerializedName;
 
 public class Reviews {
+
     @SerializedName("author")
     private String author;
     @SerializedName("content")
@@ -20,4 +21,5 @@ public class Reviews {
     public String getContent() {
         return content;
     }
+
 }

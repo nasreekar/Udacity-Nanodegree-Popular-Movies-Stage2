@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class MovieReviews {
+
     @SerializedName("results")
     private List<Reviews> reviewList;
 
@@ -15,4 +16,5 @@ public class MovieReviews {
     public List<Reviews> getReviewList() {
         return reviewList;
     }
+
 }

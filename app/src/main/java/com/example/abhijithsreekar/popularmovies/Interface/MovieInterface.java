@@ -22,16 +22,16 @@ public interface MovieInterface {
                                          @Query("page") int page);
 
     @GET("movie/{movie_id}/credits")
-    Call<MovieCredits> getMovieCredits (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
+    Call<MovieCredits> getMovieCredits(@Path("movie_id") int movieId, @Query("api_key") String apiKey);
 
     @GET("movie/{movie_id}/reviews")
-    Call<MovieReviews> getMovieReviews (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
+    Call<MovieReviews> getMovieReviews(@Path("movie_id") int movieId, @Query("api_key") String apiKey, @Query("page") int page);
 
     @GET("movie/{movie_id}")
-    Call<Movie> getMovieDetails (@Path("movie_id") int movieId, @Query("api_key") String apiKey, @Query("append_to_response") String append_to_response);
+    Call<Movie> getMovieDetails(@Path("movie_id") int movieId, @Query("api_key") String apiKey, @Query("append_to_response") String append_to_response);
 
     @GET("movie/{movie_id}")
-    Call<Movie> getMovieDetails (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
+    Call<Movie> getMovieDetails(@Path("movie_id") int movieId, @Query("api_key") String apiKey);
 
     @GET("movie/{movie_id}/videos")
     Call<MovieTrailer> getMovieTrailers(@Path("movie_id") int movieId, @Query("api_key") String apiKey);
