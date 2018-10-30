@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void getFavoriteMovies() {
         //TODO load the data from database
+
     }
 
     private void generateMovieList(final List<Movie> results) {

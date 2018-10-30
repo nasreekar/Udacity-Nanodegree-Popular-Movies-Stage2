@@ -83,8 +83,26 @@
             style="@style/BodySmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:layout_marginStart="10dp" />
+
+        <TextView
+            android:id="@+id/tv_trailers_heading"
+            style="@style/DetailsPlotHeading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="10dp"
+            android:text="@string/trailers" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_trailer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal">
+
+        </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

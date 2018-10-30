@@ -4,6 +4,7 @@ import com.example.abhijithsreekar.popularmovies.Models.Movie;
 import com.example.abhijithsreekar.popularmovies.Models.MovieCredits;
 import com.example.abhijithsreekar.popularmovies.Models.MovieResponse;
 import com.example.abhijithsreekar.popularmovies.Models.MovieReviews;
+import com.example.abhijithsreekar.popularmovies.Models.MovieTrailer;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -31,5 +32,8 @@ public interface MovieInterface {
 
     @GET("movie/{movie_id}")
     Call<Movie> getMovieDetails (@Path("movie_id") int movieId, @Query("api_key") String apiKey);
+
+    @GET("movie/{movie_id}/videos")
+    Call<MovieTrailer> getMovieTrailers(@Path("movie_id") int movieId, @Query("api_key") String apiKey);
 }
 

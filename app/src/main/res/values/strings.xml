@@ -5,8 +5,10 @@
     <string name="movie_release_date">release_date</string>
     <string name="iv_details_content_description">Movie_selected</string>
     <string name="plotAnalysis">Plot Analysis :</string>
+    <string name="trailers">Movie Trailers :</string>
     <string name="divider">|</string>
     <string name="toprated_movies">TopRated Movies</string>
     <string name="popular_movies">Popular Movies</string>
     <string name="favorite_movies">Favorite Movies</string>
+    <string name="no_description_available">No description available</string>
 </resources>

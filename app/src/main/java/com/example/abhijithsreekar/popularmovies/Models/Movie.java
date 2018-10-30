@@ -53,7 +53,7 @@ public class Movie implements Parcelable {
     private Double voteAverage;
 
     @SerializedName("videos")
-    private MovieTrailer MovieTrailer;
+    private MovieTrailer videos;
 
 
     public Movie(String posterPath, boolean adult, String overview, String releaseDate, List<Integer> genreIds, Integer movieId,
@@ -187,9 +187,9 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
-    public MovieTrailer getMovieTrailer() { return MovieTrailer; }
+    public MovieTrailer getMovieTrailer() { return videos; }
 
-    public void setMovieTrailer(MovieTrailer MovieTrailer) { this.MovieTrailer = MovieTrailer; }
+    public void setMovieTrailer(MovieTrailer MovieTrailer) { this.videos = videos; }
 
     @Override
     public int describeContents() {
@@ -207,7 +207,7 @@ public class Movie implements Parcelable {
         dest.writeString(title);
         dest.writeDouble(voteAverage);
         dest.writeString(backdropPath);
-        dest.writeParcelable(MovieTrailer, 0);
+        dest.writeParcelable(videos, 0);
     }
 
     private Movie(Parcel in){
@@ -220,7 +220,7 @@ public class Movie implements Parcelable {
         this.title = in.readString();
         this.voteAverage = in.readDouble();
         this.backdropPath = in.readString();
-        this.MovieTrailer = in.readParcelable(MovieTrailer.class.getClassLoader());
+        this.videos = in.readParcelable(MovieTrailer.class.getClassLoader());
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
