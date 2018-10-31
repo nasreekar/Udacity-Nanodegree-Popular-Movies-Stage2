@@ -81,6 +81,9 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.tv_reviews_not_available)
     TextView reviewsNotAvailable;
 
+    @BindView(R.id.iv_fav_btn)
+    ImageView favBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +93,12 @@ public class DetailsActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
         bindSelectedMovieData();
+        favBtn.setOnClickListener(v -> {
+            // TODO change favorite logo to selected and add it to Room data base
+            // aslo handle unselecting of the favorite movie
+            Toast.makeText(this,"Movie added to favorites",Toast.LENGTH_SHORT).show();
+        });
+
     }
 
     private void bindSelectedMovieData() {

@@ -35,13 +35,13 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/imageView"
+                app:layout_constraintEnd_toStartOf="@+id/iv_fav_btn"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="abc" />
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/iv_fav_btn"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginTop="5dp"
