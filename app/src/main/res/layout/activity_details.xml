@@ -87,17 +87,6 @@
             android:layout_marginBottom="20dp" />
 
         <TextView
-            android:id="@+id/tv_plot_not_available"
-            style="@style/BodySmall"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/plotNotAvailable"
-            android:visibility="gone"/>
-
-        <TextView
             android:id="@+id/tv_cast_heading"
             style="@style/DetailsPlotHeading"
             android:layout_width="wrap_content"

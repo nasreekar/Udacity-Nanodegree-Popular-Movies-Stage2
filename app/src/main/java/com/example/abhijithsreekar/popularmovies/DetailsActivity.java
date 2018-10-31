@@ -72,9 +72,6 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.rv_cast)
     public RecyclerView rvCast;
 
-    @BindView(R.id.tv_plot_not_available)
-    TextView plotNotAvailable;
-
     @BindView(R.id.tv_cast_not_available)
     TextView castNotAvailable;
 
@@ -108,7 +105,7 @@ public class DetailsActivity extends AppCompatActivity {
         if (selectedMovie.getOverview() != null && !selectedMovie.getOverview().isEmpty()) {
             moviePlot.setText(selectedMovie.getOverview());
         } else {
-            toggleNoPlotSynopsisMessage();
+            moviePlot.setText(getResources().getString(R.string.plotNotAvailable));
         }
         movieReleaseDate.setText(new StringBuilder("Release Date: ").append(selectedMovie.getReleaseDate()));
         movieVoteAverage.setText(new StringBuilder("Rating: ").append(selectedMovie.getVoteAverage()));
@@ -133,10 +130,13 @@ public class DetailsActivity extends AppCompatActivity {
                 public void onResponse(@NonNull Call<MovieCredits> call, @NonNull Response<MovieCredits> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         cast = response.body().getCast();
-                        if (trailers != null && !trailers.isEmpty()) {
+                        if (cast != null && !cast.isEmpty()) {
+                            rvCast.setVisibility(View.VISIBLE);
+                            castNotAvailable.setVisibility(View.GONE);
                             generateCreditsList(cast);
                         } else {
-                            toggleNoCastMessage();
+                            rvCast.setVisibility(View.GONE);
+                            castNotAvailable.setVisibility(View.VISIBLE);
                         }
                     }
                 }
@@ -164,9 +164,12 @@ public class DetailsActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         reviews = response.body().getReviewList();
                         if (reviews != null && !reviews.isEmpty()) {
+                            rvReviews.setVisibility(View.VISIBLE);
+                            reviewsNotAvailable.setVisibility(View.GONE);
                             generateReviewList(reviews);
                         } else {
-                            toggleNoReviewsMessage();
+                            rvReviews.setVisibility(View.GONE);
+                            reviewsNotAvailable.setVisibility(View.VISIBLE);
                         }
                     }
                 }
@@ -194,9 +197,12 @@ public class DetailsActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         trailers = response.body().getTrailers();
                         if (trailers != null && !trailers.isEmpty()) {
+                            rvTrailer.setVisibility(View.VISIBLE);
+                            trailersNotAvailable.setVisibility(View.GONE);
                             generateTrailerList(trailers);
                         } else {
-                            toggleNoTrailerMessage();
+                            rvTrailer.setVisibility(View.GONE);
+                            trailersNotAvailable.setVisibility(View.VISIBLE);
                         }
                     }
                 }
@@ -239,61 +245,5 @@ public class DetailsActivity extends AppCompatActivity {
     private void initTrailersAdapter(CustomTrailerAdapter adapter) {
         rvTrailer.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvTrailer.setAdapter(adapter);
-    }
-
-    private void toggleNoTrailerMessage() {
-        if (trailersNotAvailable.getVisibility() == View.GONE) {
-            trailersNotAvailable.setVisibility(View.VISIBLE);
-        } else {
-            trailersNotAvailable.setVisibility(View.GONE);
-        }
-
-        if (rvTrailer.getVisibility() == View.VISIBLE) {
-            rvTrailer.setVisibility(View.GONE);
-        } else {
-            rvTrailer.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void toggleNoCastMessage() {
-        if (castNotAvailable.getVisibility() == View.GONE) {
-            castNotAvailable.setVisibility(View.VISIBLE);
-        } else {
-            castNotAvailable.setVisibility(View.GONE);
-        }
-
-        if (rvCast.getVisibility() == View.VISIBLE) {
-            rvCast.setVisibility(View.GONE);
-        } else {
-            rvCast.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void toggleNoReviewsMessage() {
-        if (reviewsNotAvailable.getVisibility() == View.GONE) {
-            reviewsNotAvailable.setVisibility(View.VISIBLE);
-        } else {
-            reviewsNotAvailable.setVisibility(View.GONE);
-        }
-
-        if (rvReviews.getVisibility() == View.VISIBLE) {
-            rvReviews.setVisibility(View.GONE);
-        } else {
-            rvReviews.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void toggleNoPlotSynopsisMessage() {
-        if (plotNotAvailable.getVisibility() == View.GONE) {
-            plotNotAvailable.setVisibility(View.VISIBLE);
-        } else {
-            plotNotAvailable.setVisibility(View.GONE);
-        }
-
-        if (moviePlot.getVisibility() == View.VISIBLE) {
-            moviePlot.setVisibility(View.GONE);
-        } else {
-            moviePlot.setVisibility(View.VISIBLE);
-        }
     }
 }
