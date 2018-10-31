@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,13 +20,40 @@
             android:contentDescription="@string/iv_details_content_description"
             android:scaleType="centerCrop" />
 
-        <TextView
-            android:id="@+id/tv_details_MovieTitle"
-            style="@style/FancyLarge"
-            android:layout_width="wrap_content"
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginBottom="20dp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_details_MovieTitle"
+                style="@style/FancyLarge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/imageView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="abc" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="@string/movie_content_description"
+                android:scaleType="centerCrop"
+                android:src="@drawable/favorite_unsel"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -105,13 +133,13 @@
         <TextView
             android:id="@+id/tv_cast_not_available"
             style="@style/BodySmall"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
             android:text="@string/castNotAvailable"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_trailers_heading"
@@ -132,13 +160,13 @@
         <TextView
             android:id="@+id/tv_trailers_not_available"
             style="@style/BodySmall"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
             android:text="@string/trailerNotAvailable"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_reviews_heading"
@@ -159,13 +187,13 @@
         <TextView
             android:id="@+id/tv_reviews_not_available"
             style="@style/BodySmall"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
             android:text="@string/reviewsNotAvailable"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>
