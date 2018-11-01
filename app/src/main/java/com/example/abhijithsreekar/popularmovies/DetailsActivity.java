@@ -3,6 +3,7 @@ package com.example.abhijithsreekar.popularmovies;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomCastAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomReviewsAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomTrailerAdapter;
+import com.example.abhijithsreekar.popularmovies.Database.MovieDatabase;
 import com.example.abhijithsreekar.popularmovies.Interface.MovieInterface;
 import com.example.abhijithsreekar.popularmovies.Models.Cast;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
@@ -24,6 +26,7 @@ import com.example.abhijithsreekar.popularmovies.Models.MovieTrailer;
 import com.example.abhijithsreekar.popularmovies.Models.Reviews;
 import com.example.abhijithsreekar.popularmovies.Models.Trailer;
 import com.example.abhijithsreekar.popularmovies.Network.APIClient;
+import com.example.abhijithsreekar.popularmovies.Utils.AppExecutors;
 import com.example.abhijithsreekar.popularmovies.Utils.MovieUtils;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
@@ -84,6 +87,8 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.iv_fav_btn)
     ImageView favBtn;
 
+    private MovieDatabase movieDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,22 +97,18 @@ public class DetailsActivity extends AppCompatActivity {
         API_KEY = getResources().getString(R.string.API_KEY);
 
         ButterKnife.bind(this);
-        bindSelectedMovieData();
-        favBtn.setOnClickListener(v -> {
-            // TODO change favorite logo to selected and add it to Room data base
-            // aslo handle unselecting of the favorite movie
-            Toast.makeText(this,"Movie added to favorites",Toast.LENGTH_SHORT).show();
-        });
+        movieDatabase = MovieDatabase.getInstance(getApplicationContext());
 
+        bindSelectedMovieData();
     }
 
     private void bindSelectedMovieData() {
         Intent intent = getIntent();
         Movie selectedMovie = intent.getParcelableExtra("Movie");
 
-        getMovieTrailers(selectedMovie.getId());
-        getMovieReviews(selectedMovie.getId());
-        getMovieCast(selectedMovie.getId());
+        getMovieTrailers(selectedMovie.getMovieId());
+        getMovieReviews(selectedMovie.getMovieId());
+        getMovieCast(selectedMovie.getMovieId());
 
         movieTitle.setText(selectedMovie.getTitle());
         movieLanguage.setText(new StringBuilder("Language: ").append(selectedMovie.getOriginalLanguage()));
@@ -125,6 +126,37 @@ public class DetailsActivity extends AppCompatActivity {
                 .placeholder((R.drawable.gradient_background))
                 .error(R.drawable.ic_launcher_background)
                 .into(moviePoster);
+
+        if(selectedMovie.isFavorite()){
+            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
+        }else
+        {
+            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
+        }
+        favBtn.setOnClickListener(v -> onFavButtonClicked(selectedMovie));
+    }
+
+    private void onFavButtonClicked(Movie selectedMovie) {
+        if (selectedMovie.isFavorite()) {
+            selectedMovie.setFavorite(false);
+            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
+            AppExecutors.getExecutorInstance().getDiskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    movieDatabase.movieDao().deleteFavoriteMovie(selectedMovie.getMovieId());
+                }
+            });
+            Toast.makeText(this, "Movie removed from favorites", Toast.LENGTH_SHORT).show();
+        } else {
+            selectedMovie.setFavorite(true);
+            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
+            Movie favMovie = new Movie(selectedMovie.getMovieId(),selectedMovie.getTitle(),selectedMovie.getOriginalTitle(),
+                    selectedMovie.getOriginalLanguage(),selectedMovie.getOverview(), selectedMovie.getReleaseDate(),
+                    selectedMovie.getVoteAverage(), selectedMovie.getBackdropPath(),selectedMovie.getPosterPath(),
+                    selectedMovie.isFavorite());
+            AppExecutors.getExecutorInstance().getDiskIO().execute(() -> movieDatabase.movieDao().insertFavoriteMovie(favMovie));
+            Toast.makeText(this, "Movie added to favorites", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getMovieCast(Integer id) {

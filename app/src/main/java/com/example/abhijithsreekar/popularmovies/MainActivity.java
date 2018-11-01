@@ -13,10 +13,12 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomMoviesAdapter;
+import com.example.abhijithsreekar.popularmovies.Database.MovieDatabase;
 import com.example.abhijithsreekar.popularmovies.Interface.MovieInterface;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
 import com.example.abhijithsreekar.popularmovies.Models.MovieResponse;
 import com.example.abhijithsreekar.popularmovies.Network.APIClient;
+import com.example.abhijithsreekar.popularmovies.Utils.AppExecutors;
 import com.example.abhijithsreekar.popularmovies.Utils.MovieUtils;
 
 import java.util.List;
@@ -43,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     public List<Movie> movies;
     private int currentPage = 1;
 
+    private MovieDatabase movieDatabase;
+    private List<Movie> favMovies;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +60,6 @@ public class MainActivity extends AppCompatActivity {
         getPopularMovies();
     }
 
-    // TODO - Implement savedInstancestate and restoreInstanceState - Part 2
-
-    // TODO - Refactor popular movies and top rated movies code into one function - Part 2
     private void getPopularMovies() {
         if (MovieUtils.getInstance().isNetworkAvailable(this)) {
             if (retrofit == null) {
@@ -124,17 +126,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void getFavoriteMovies() {
         //TODO load the data from database
+        movieDatabase = MovieDatabase.getInstance(getApplicationContext());
+        AppExecutors.getExecutorInstance().getDiskIO().execute(() -> {
+            favMovies = movieDatabase.movieDao().loadAllMovies();
+            runOnUiThread(() -> generateMovieList(favMovies));
 
+        });
     }
 
     private void generateMovieList(final List<Movie> results) {
-        CustomMoviesAdapter adapter = new CustomMoviesAdapter(this, results, new CustomMoviesAdapter.MovieItemClickListener() {
-            @Override
-            public void onMovieItemClick(int clickedItemIndex) {
-                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-                intent.putExtra("Movie", results.get(clickedItemIndex));
-                startActivity(intent);
-            }
+        CustomMoviesAdapter adapter = new CustomMoviesAdapter(this, results, clickedItemIndex -> {
+            Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+            intent.putExtra("Movie", results.get(clickedItemIndex));
+            startActivity(intent);
         });
 
         initializeGridView(adapter);
@@ -144,8 +148,6 @@ public class MainActivity extends AppCompatActivity {
         rvMain.setHasFixedSize(true);
         rvMain.setLayoutManager(new GridLayoutManager(this, 2));
         rvMain.setAdapter(adapter);
-
-        // TODO - Implement Pagination (onScrollListener) - Part 2
     }
 
     @Override
