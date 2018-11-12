@@ -1,5 +1,6 @@
 package com.example.abhijithsreekar.popularmovies.Database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -14,7 +15,7 @@ import java.util.List;
 public interface MovieDao {
 
     @Query("SELECT * FROM movie ORDER BY vote_average DESC")
-    List<Movie> loadAllMovies();
+    LiveData<List<Movie>> loadAllFavoriteMovies();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertFavoriteMovie(Movie movie);

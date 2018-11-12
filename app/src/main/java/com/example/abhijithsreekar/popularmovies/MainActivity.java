@@ -1,7 +1,10 @@
 package com.example.abhijithsreekar.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,9 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private static String API_KEY;
     public List<Movie> movies;
     private int currentPage = 1;
-
-    private MovieDatabase movieDatabase;
-    private List<Movie> favMovies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,11 +126,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void getFavoriteMovies() {
         //TODO load the data from database
-        movieDatabase = MovieDatabase.getInstance(getApplicationContext());
-        AppExecutors.getExecutorInstance().getDiskIO().execute(() -> {
-            favMovies = movieDatabase.movieDao().loadAllMovies();
-            runOnUiThread(() -> generateMovieList(favMovies));
-
+        MovieDatabase movieDatabase = MovieDatabase.getInstance(getApplicationContext());
+        LiveData<List<Movie>> favMovies = movieDatabase.movieDao().loadAllFavoriteMovies();
+        favMovies.observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                Log.d(TAG,"Receiving fav movies from database");
+                generateMovieList(movies);
+            }
         });
     }
 
