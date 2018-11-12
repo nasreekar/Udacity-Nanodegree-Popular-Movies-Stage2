@@ -1,6 +1,9 @@
 package com.example.abhijithsreekar.popularmovies.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.abhijithsreekar.popularmovies.DetailsActivity;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
 import com.example.abhijithsreekar.popularmovies.R;
 import com.squareup.picasso.OkHttp3Downloader;
@@ -18,36 +22,51 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.SELECTED_MOVIE_TO_SEE_DETAILS;
+
 public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMoviesAdapter.CustomMovieViewHolder> {
 
     private List<Movie> dataList;
     private Context context;
-    final private MovieItemClickListener mOnMovieItemClickListener;
 
-    public interface MovieItemClickListener {
-        void onMovieItemClick(int clickedItemIndex);
-    }
-
-    public CustomMoviesAdapter(Context context, List<Movie> dataList, MovieItemClickListener listener) {
+    public CustomMoviesAdapter(Context context, List<Movie> dataList, RecyclerView recyclerView) {
         this.context = context;
         this.dataList = dataList;
-        this.mOnMovieItemClickListener = listener;
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
     }
 
+    @NonNull
     @Override
-    public CustomMovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public CustomMovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_grid_movie_item, parent, false);
         return new CustomMovieViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(CustomMovieViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CustomMovieViewHolder holder, int position) {
         holder.bindMovie(dataList.get(position));
     }
 
     @Override
     public int getItemCount() {
         return dataList.size();
+    }
+
+    public void setData(List<Movie> movies) {
+        this.dataList = movies;
+        notifyDataSetChanged();
+    }
+
+    public void clear() {
+        this.dataList.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(List<Movie> movies) {
+        this.dataList.addAll(movies);
+        notifyDataSetChanged();
     }
 
     class CustomMovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -69,7 +88,7 @@ public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMoviesAdapte
         }
 
         void bindMovie(Movie movie) {
-            StringBuilder releaseText = new StringBuilder().append("Release Date: ");
+            StringBuilder releaseText = new StringBuilder().append(mContext.getResources().getString(R.string.Release_Date_Title));
             releaseText.append(movie.getReleaseDate());
 
             movieTitle.setText(movie.getOriginalTitle());
@@ -84,8 +103,10 @@ public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMoviesAdapte
 
         @Override
         public void onClick(View v) {
-            int clickedPosition = getAdapterPosition();
-            mOnMovieItemClickListener.onMovieItemClick(clickedPosition);
+            Movie movie = dataList.get(getAdapterPosition());
+            Intent intent = new Intent(context, DetailsActivity.class);
+            intent.putExtra(SELECTED_MOVIE_TO_SEE_DETAILS, movie);
+            v.getContext().startActivity(intent);
         }
     }
 }

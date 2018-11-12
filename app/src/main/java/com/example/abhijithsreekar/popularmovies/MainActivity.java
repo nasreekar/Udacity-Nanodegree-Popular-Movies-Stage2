@@ -1,12 +1,9 @@
 package com.example.abhijithsreekar.popularmovies;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.content.Intent;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -16,26 +13,29 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomMoviesAdapter;
-import com.example.abhijithsreekar.popularmovies.Database.MovieDatabase;
 import com.example.abhijithsreekar.popularmovies.Interface.MovieInterface;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
 import com.example.abhijithsreekar.popularmovies.Models.MovieResponse;
 import com.example.abhijithsreekar.popularmovies.Network.APIClient;
-import com.example.abhijithsreekar.popularmovies.Utils.AppExecutors;
 import com.example.abhijithsreekar.popularmovies.Utils.MovieUtils;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
+
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.ACTIVITY_TITLE;
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.FAV_MOVIE_KEY;
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.MOVIES_LIST;
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.RECYCLER_VIEW_LAYOUT_MANAGER_STATE;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
 
     @BindView(R.id.rv_main)
     public RecyclerView rvMain;
@@ -43,40 +43,69 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.progressBar)
     public ProgressBar progressBar;
 
-    private static Retrofit retrofit;
     private static String API_KEY;
-    public List<Movie> movies;
+    public ArrayList<Movie> movies;
     private int currentPage = 1;
+    MainActivityViewModel viewModel;
+    CustomMoviesAdapter adapter;
+    private MovieInterface movieService;
+    private static String actionBarTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTitle(R.string.popular_movies);
         API_KEY = getResources().getString(R.string.API_KEY);
 
         ButterKnife.bind(this);
-        progressBar.setVisibility(View.VISIBLE);
-        getPopularMovies();
+        movies = new ArrayList<>();
+
+        adapter = new CustomMoviesAdapter(this, movies, rvMain);
+        rvMain.setAdapter(adapter);
+
+        viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        /*viewModel.getFavoriteMovies().observe(this, favorites -> {
+            if (favorites != null) {
+                if (movies == null) {
+                    movies = new ArrayList<>();
+                } else {
+                    adapter.clear();
+                }
+                adapter.addAll(favorites);
+            }
+        });*/
+
+        movieService = APIClient.getRetrofitInstance().create(MovieInterface.class);
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(MOVIES_LIST)) {
+                progressBar.setVisibility(View.GONE);
+                setTitle(savedInstanceState.getString(ACTIVITY_TITLE));
+                movies = savedInstanceState.getParcelableArrayList(MOVIES_LIST);
+                adapter.clear();
+                adapter.setData(movies);
+            }
+        }
+
+        if (savedInstanceState == null) {
+            progressBar.setVisibility(View.VISIBLE);
+            getPopularMovies();
+        }
     }
 
     private void getPopularMovies() {
         if (MovieUtils.getInstance().isNetworkAvailable(this)) {
-            if (retrofit == null) {
-                retrofit = APIClient.getRetrofitInstance();
-            }
-            MovieInterface movieService = retrofit.create(MovieInterface.class);
+
             Call<MovieResponse> call = movieService.getPopularMovies(API_KEY, getResources().getString(R.string.LANGUAGE), currentPage);
             Log.i("Popular movies api", movieService.getPopularMovies(API_KEY, getResources().getString(R.string.LANGUAGE), 1).request().url().toString());
             call.enqueue(new Callback<MovieResponse>() {
                 @Override
-                public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                     if (response.isSuccessful()) {
                         progressBar.setVisibility(View.INVISIBLE);
-                        movies = response.body().getResults();
-                        if (movies != null) {
-                            generateMovieList(movies);
-                            Log.d(TAG, "Number of popular movies received: " + movies.size());
+                        if (response.body().getMovies() != null) {
+                            Log.d(TAG, "Number of popular movies received: " + response.body().getMovies().size());
+                            adapter.addAll(response.body().getMovies());
                         }
                     }
                 }
@@ -94,10 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void getTopRatedMovies() {
         if (MovieUtils.getInstance().isNetworkAvailable(this)) {
-            if (retrofit == null) {
-                retrofit = APIClient.getRetrofitInstance();
-            }
-            MovieInterface movieService = retrofit.create(MovieInterface.class);
+
             Call<MovieResponse> call = movieService.getTopRatedMovies(API_KEY, getResources().getString(R.string.LANGUAGE), currentPage);
             Log.i("Top movies api", movieService.getTopRatedMovies(API_KEY, getResources().getString(R.string.LANGUAGE), 1).request().url().toString());
             call.enqueue(new Callback<MovieResponse>() {
@@ -105,10 +131,9 @@ public class MainActivity extends AppCompatActivity {
                 public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                     if (response.isSuccessful()) {
                         progressBar.setVisibility(View.INVISIBLE);
-                        movies = response.body().getResults();
-                        if (movies != null) {
-                            generateMovieList(movies);
-                            Log.d(TAG, "Number of top rated movies received: " + movies.size());
+                        if (response.body().getMovies() != null) {
+                            Log.d(TAG, "Number of top rated movies received: " + response.body().getMovies().size());
+                            adapter.addAll(response.body().getMovies());
                         }
                     }
                 }
@@ -125,32 +150,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getFavoriteMovies() {
-        //TODO load the data from database
-        MovieDatabase movieDatabase = MovieDatabase.getInstance(getApplicationContext());
-        LiveData<List<Movie>> favMovies = movieDatabase.movieDao().loadAllFavoriteMovies();
-        favMovies.observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                Log.d(TAG,"Receiving fav movies from database");
-                generateMovieList(movies);
+        viewModel.getFavoriteMovies().observe(this, favoriteMovies -> {
+            if (favoriteMovies != null && favoriteMovies.size() > 0) {
+                progressBar.setVisibility(View.INVISIBLE);
+                Log.d(TAG, "updating list of movies from Live data in ViewModel");
+                adapter.addAll(favoriteMovies);
+            } else {
+                progressBar.setVisibility(View.INVISIBLE);
+                Toast.makeText(getApplicationContext(), "No favorite Movies Found", Toast.LENGTH_SHORT).show();
             }
         });
-    }
 
-    private void generateMovieList(final List<Movie> results) {
-        CustomMoviesAdapter adapter = new CustomMoviesAdapter(this, results, clickedItemIndex -> {
-            Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-            intent.putExtra("Movie", results.get(clickedItemIndex));
-            startActivity(intent);
-        });
-
-        initializeGridView(adapter);
-    }
-
-    private void initializeGridView(CustomMoviesAdapter adapter) {
-        rvMain.setHasFixedSize(true);
-        rvMain.setLayoutManager(new GridLayoutManager(this, 2));
-        rvMain.setAdapter(adapter);
     }
 
     @Override
@@ -164,20 +174,49 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.topRated:
+                progressBar.setVisibility(View.VISIBLE);
+                adapter.clear();
                 getTopRatedMovies();
                 setTitle(R.string.toprated_movies);
+                actionBarTitle = getResources().getString(R.string.toprated_movies);
                 break;
             case R.id.popular:
+                progressBar.setVisibility(View.VISIBLE);
+                adapter.clear();
                 getPopularMovies();
                 setTitle(R.string.popular_movies);
+                actionBarTitle = getResources().getString(R.string.popular_movies);
                 break;
 
             case R.id.favorite:
+                progressBar.setVisibility(View.VISIBLE);
+                adapter.clear();
                 getFavoriteMovies();
                 setTitle(R.string.favorite_movies);
+                actionBarTitle = getResources().getString(R.string.favorite_movies);
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(MOVIES_LIST, movies);
+        outState.putString(ACTIVITY_TITLE, actionBarTitle);
+        outState.putParcelable(RECYCLER_VIEW_LAYOUT_MANAGER_STATE, rvMain.getLayoutManager().onSaveInstanceState());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (getIntent().getExtras() != null) {
+            if (getIntent().getExtras().getBoolean(FAV_MOVIE_KEY)) {
+                adapter.clear();
+                setTitle(R.string.favorite_movies);
+                getFavoriteMovies();
+            }
+        }
     }
 
 }

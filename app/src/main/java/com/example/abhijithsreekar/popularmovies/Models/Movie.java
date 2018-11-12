@@ -258,6 +258,7 @@ public class Movie implements Parcelable {
         dest.writeByte((byte) (isFavorite ? 1 : 0));
     }
 
+    @Ignore
     private Movie(Parcel in){
         this.movieId =  in.readInt();
         this.posterPath = in.readString();

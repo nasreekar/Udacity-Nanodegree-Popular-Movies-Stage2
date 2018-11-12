@@ -1,5 +1,6 @@
 package com.example.abhijithsreekar.popularmovies;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,7 +17,6 @@ import android.widget.Toast;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomCastAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomReviewsAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomTrailerAdapter;
-import com.example.abhijithsreekar.popularmovies.Database.MovieDatabase;
 import com.example.abhijithsreekar.popularmovies.Interface.MovieInterface;
 import com.example.abhijithsreekar.popularmovies.Models.Cast;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
@@ -26,7 +26,6 @@ import com.example.abhijithsreekar.popularmovies.Models.MovieTrailer;
 import com.example.abhijithsreekar.popularmovies.Models.Reviews;
 import com.example.abhijithsreekar.popularmovies.Models.Trailer;
 import com.example.abhijithsreekar.popularmovies.Network.APIClient;
-import com.example.abhijithsreekar.popularmovies.Utils.AppExecutors;
 import com.example.abhijithsreekar.popularmovies.Utils.MovieUtils;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
@@ -39,6 +38,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.FAV_MOVIE_KEY;
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.SELECTED_MOVIE_TO_SEE_DETAILS;
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -87,38 +89,37 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.iv_fav_btn)
     ImageView favBtn;
 
-    private MovieDatabase movieDatabase;
+    private DetailsActivityViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        getSupportActionBar().hide();
         API_KEY = getResources().getString(R.string.API_KEY);
 
         ButterKnife.bind(this);
-        movieDatabase = MovieDatabase.getInstance(getApplicationContext());
+        viewModel = ViewModelProviders.of(this).get(DetailsActivityViewModel.class);
 
         bindSelectedMovieData();
     }
 
     private void bindSelectedMovieData() {
         Intent intent = getIntent();
-        Movie selectedMovie = intent.getParcelableExtra("Movie");
+        Movie selectedMovie = intent.getParcelableExtra(SELECTED_MOVIE_TO_SEE_DETAILS);
 
         getMovieTrailers(selectedMovie.getMovieId());
         getMovieReviews(selectedMovie.getMovieId());
         getMovieCast(selectedMovie.getMovieId());
 
         movieTitle.setText(selectedMovie.getTitle());
-        movieLanguage.setText(new StringBuilder("Language: ").append(selectedMovie.getOriginalLanguage()));
+        movieLanguage.setText(new StringBuilder(getString(R.string.Language_Title)).append(selectedMovie.getOriginalLanguage()));
         if (selectedMovie.getOverview() != null && !selectedMovie.getOverview().isEmpty()) {
             moviePlot.setText(selectedMovie.getOverview());
         } else {
             moviePlot.setText(getResources().getString(R.string.plotNotAvailable));
         }
-        movieReleaseDate.setText(new StringBuilder("Release Date: ").append(selectedMovie.getReleaseDate()));
-        movieVoteAverage.setText(new StringBuilder("Rating: ").append(selectedMovie.getVoteAverage()));
+        movieReleaseDate.setText(new StringBuilder(getString(R.string.Release_Date_Title)).append(selectedMovie.getReleaseDate()));
+        movieVoteAverage.setText(new StringBuilder(getString(R.string.Rating_Title)).append(selectedMovie.getVoteAverage()));
 
         Picasso.Builder builder = new Picasso.Builder(this);
         builder.downloader(new OkHttp3Downloader(this));
@@ -127,10 +128,9 @@ public class DetailsActivity extends AppCompatActivity {
                 .error(R.drawable.ic_launcher_background)
                 .into(moviePoster);
 
-        if(selectedMovie.isFavorite()){
+        if (selectedMovie.isFavorite()) {
             favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
-        }else
-        {
+        } else {
             favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
         }
         favBtn.setOnClickListener(v -> onFavButtonClicked(selectedMovie));
@@ -140,23 +140,26 @@ public class DetailsActivity extends AppCompatActivity {
         if (selectedMovie.isFavorite()) {
             selectedMovie.setFavorite(false);
             favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
-            AppExecutors.getExecutorInstance().getDiskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    movieDatabase.movieDao().deleteFavoriteMovie(selectedMovie.getMovieId());
-                }
-            });
-            Toast.makeText(this, "Movie removed from favorites", Toast.LENGTH_SHORT).show();
+            viewModel.removeMovieFromFavorites(selectedMovie.getMovieId());
+            Toast.makeText(this, R.string.Favorite_Removed, Toast.LENGTH_SHORT).show();
+            navigateToFavoritesMovieScreen();
         } else {
             selectedMovie.setFavorite(true);
             favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
-            Movie favMovie = new Movie(selectedMovie.getMovieId(),selectedMovie.getTitle(),selectedMovie.getOriginalTitle(),
-                    selectedMovie.getOriginalLanguage(),selectedMovie.getOverview(), selectedMovie.getReleaseDate(),
-                    selectedMovie.getVoteAverage(), selectedMovie.getBackdropPath(),selectedMovie.getPosterPath(),
+            Movie favMovie = new Movie(selectedMovie.getMovieId(), selectedMovie.getTitle(), selectedMovie.getOriginalTitle(),
+                    selectedMovie.getOriginalLanguage(), selectedMovie.getOverview(), selectedMovie.getReleaseDate(),
+                    selectedMovie.getVoteAverage(), selectedMovie.getBackdropPath(), selectedMovie.getPosterPath(),
                     selectedMovie.isFavorite());
-            AppExecutors.getExecutorInstance().getDiskIO().execute(() -> movieDatabase.movieDao().insertFavoriteMovie(favMovie));
-            Toast.makeText(this, "Movie added to favorites", Toast.LENGTH_SHORT).show();
+            viewModel.addMovieToFavorites(favMovie);
+            Toast.makeText(this, R.string.Favorite_Added, Toast.LENGTH_SHORT).show();
+            navigateToFavoritesMovieScreen();
         }
+    }
+
+    private void navigateToFavoritesMovieScreen() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(FAV_MOVIE_KEY, true);
+        startActivity(intent);
     }
 
     private void getMovieCast(Integer id) {
@@ -184,11 +187,11 @@ public class DetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<MovieCredits> call, Throwable t) {
-                    Toast.makeText(DetailsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, R.string.Something_wrong_text, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Log.i("Network Connection Status", "Not available");
+            Log.i(getString(R.string.Network_Status), getString(R.string.Not_Available_Text));
         }
     }
 
@@ -217,11 +220,11 @@ public class DetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<MovieReviews> call, Throwable t) {
-                    Toast.makeText(DetailsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, R.string.Something_wrong_text, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Log.i("Network Connection Status", "Not available");
+            Log.i(getString(R.string.Network_Status), getString(R.string.Not_Available_Text));
         }
     }
 
@@ -249,12 +252,12 @@ public class DetailsActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<MovieTrailer> call, Throwable t) {
-                    Toast.makeText(DetailsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                public void onFailure(@NonNull Call<MovieTrailer> call, @NonNull Throwable t) {
+                    Toast.makeText(DetailsActivity.this, R.string.Something_wrong_text, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Log.i("Network Connection Status", "Not available");
+            Log.i(getString(R.string.Network_Status), getString(R.string.Not_Available_Text));
         }
     }
 
