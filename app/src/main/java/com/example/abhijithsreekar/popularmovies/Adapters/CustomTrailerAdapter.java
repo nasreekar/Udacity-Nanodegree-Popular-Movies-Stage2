@@ -60,7 +60,7 @@ public class CustomTrailerAdapter extends RecyclerView.Adapter<CustomTrailerAdap
     }
 
     //ViewHolder for review item view to help reduce findViewById calls
-    class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         @BindView(R.id.thumbnail)
         ImageView imageView;
@@ -76,6 +76,7 @@ public class CustomTrailerAdapter extends RecyclerView.Adapter<CustomTrailerAdap
 
             trailerPlayBtn.setOnClickListener(this);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
@@ -90,6 +91,19 @@ public class CustomTrailerAdapter extends RecyclerView.Adapter<CustomTrailerAdap
                     Toast.makeText(context,"Error playing the video", Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            Trailer video = trailers.get(getAdapterPosition());
+            if (video != null) {
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                Uri uri = Uri.parse(context.getResources().getString(R.string.YOUTUBE_BASE_VIDEO_URL) + video.getKey());
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                context.startActivity(Intent.createChooser(sharingIntent, "Share Video url using"));
+            }
+            return true;
         }
     }
 }
