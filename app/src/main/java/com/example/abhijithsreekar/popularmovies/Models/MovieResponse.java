@@ -3,7 +3,6 @@ package com.example.abhijithsreekar.popularmovies.Models;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MovieResponse {
 

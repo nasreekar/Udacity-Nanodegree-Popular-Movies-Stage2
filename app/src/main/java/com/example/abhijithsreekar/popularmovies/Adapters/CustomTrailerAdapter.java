@@ -42,7 +42,7 @@ public class CustomTrailerAdapter extends RecyclerView.Adapter<CustomTrailerAdap
     public void onBindViewHolder(@NonNull TrailerViewHolder holder, int position) {
         Trailer trailer = trailers.get(position);
         if (trailer.getSite().equalsIgnoreCase("youtube")) {
-            Uri uri = Uri.parse(context.getResources().getString(R.string.YOUTUBE_BASE_IMAGE_URL) + trailer.getKey()  + context.getResources().getString(R.string.YOUTUBE_IMAGE_EXTENSION));
+            Uri uri = Uri.parse(context.getResources().getString(R.string.YOUTUBE_BASE_IMAGE_URL) + trailer.getKey() + context.getResources().getString(R.string.YOUTUBE_IMAGE_EXTENSION));
             holder.name.setText(trailer.getTitle());
             Picasso.Builder builder = new Picasso.Builder(context);
             builder.build()
@@ -88,7 +88,7 @@ public class CustomTrailerAdapter extends RecyclerView.Adapter<CustomTrailerAdap
                 if (intent.resolveActivity(context.getPackageManager()) != null) {
                     context.startActivity(intent);
                 } else {
-                    Toast.makeText(context,"Error playing the video", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Error playing the video", Toast.LENGTH_SHORT).show();
                 }
             }
         }
