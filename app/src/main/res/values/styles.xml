@@ -22,27 +22,27 @@
 
     <style name="BodySmall">
         <item name="android:fontFamily">@font/itcavantgardestd_bk</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">@dimen/text_15</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textAlignment">viewStart</item>
     </style>
 
     <style name="DetailsPlotHeading">
         <item name="android:fontFamily">@font/itcavantgardestd_demi</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/text_20</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="FancyLarge">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">@dimen/text_32</item>
         <item name="android:lineSpacingExtra">-4sp</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:fontFamily">@font/kautivacyrillicblack</item>
     </style>
 
     <style name="Micro">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/text_12</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:lineSpacingExtra">2sp</item>
         <item name="android:textColor">@android:color/black</item>
@@ -50,7 +50,7 @@
     </style>
 
     <style name="MainActivityReleaseDate" parent="BodySmall">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/text_12</item>
         <item name="android:alpha">0.5</item>
     </style>
 

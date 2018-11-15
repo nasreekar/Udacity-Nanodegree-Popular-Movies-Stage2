@@ -22,7 +22,7 @@
     <string name="Rating_Title">Rating:</string>
     <string name="Favorite_Removed">Movie removed from favorites</string>
     <string name="Favorite_Added">Movie added to favorites</string>
-    <string name="Network_Status">Network Connection Status</string>
+    <string name="Network_Status_Not_Available">Network Connection Not Available</string>
     <string name="Not_Available_Text">Not available</string>
     <string name="Something_wrong_text">Something went wrong...Please try later!</string>
 </resources>

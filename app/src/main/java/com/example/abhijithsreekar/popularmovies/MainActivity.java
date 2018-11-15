@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private static String API_KEY;
     public ArrayList<Movie> movies;
     private int currentPage = 1;
-    MainActivityViewModel viewModel;
-    CustomMoviesAdapter adapter;
+    private MainActivityViewModel viewModel;
+    private CustomMoviesAdapter adapter;
     private MovieInterface movieService;
     private static String actionBarTitle;
 
@@ -64,16 +64,6 @@ public class MainActivity extends AppCompatActivity {
         rvMain.setAdapter(adapter);
 
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        /*viewModel.getFavoriteMovies().observe(this, favorites -> {
-            if (favorites != null) {
-                if (movies == null) {
-                    movies = new ArrayList<>();
-                } else {
-                    adapter.clear();
-                }
-                adapter.addAll(favorites);
-            }
-        });*/
 
         movieService = APIClient.getRetrofitInstance().create(MovieInterface.class);
 
@@ -113,11 +103,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<MovieResponse> call, Throwable t) {
                     progressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,  getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Log.i("Network Connection Status", "Not available");
+            progressBar.setVisibility(View.INVISIBLE);
+            Toast.makeText(MainActivity.this,  getResources().getString(R.string.Network_Status_Not_Available), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -141,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<MovieResponse> call, Throwable t) {
                     progressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,  getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {

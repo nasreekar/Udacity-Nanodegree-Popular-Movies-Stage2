@@ -24,14 +24,16 @@ import butterknife.ButterKnife;
 
 import static com.example.abhijithsreekar.popularmovies.Utils.Constants.SELECTED_MOVIE_TO_SEE_DETAILS;
 
-public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMoviesAdapter.CustomMovieViewHolder> {
+public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMovieViewHolder> implements RecyclerViewClickListener {
 
     private List<Movie> dataList;
     private Context context;
+    private RecyclerViewClickListener mListener;
 
     public CustomMoviesAdapter(Context context, List<Movie> dataList, RecyclerView recyclerView) {
         this.context = context;
         this.dataList = dataList;
+        this.mListener = this;
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
@@ -41,7 +43,7 @@ public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMoviesAdapte
     @Override
     public CustomMovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_grid_movie_item, parent, false);
-        return new CustomMovieViewHolder(view);
+        return new CustomMovieViewHolder(view, mListener);
     }
 
     @Override
@@ -69,45 +71,13 @@ public class CustomMoviesAdapter extends RecyclerView.Adapter<CustomMoviesAdapte
         notifyDataSetChanged();
     }
 
-    class CustomMovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        Context mContext;
-
-        @BindView(R.id.tvMovieTitle)
-        TextView movieTitle;
-        @BindView(R.id.ivMovieImage)
-        ImageView coverImage;
-        @BindView(R.id.tvReleaseDate)
-        TextView releaseDate;
-
-        CustomMovieViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-            mContext = itemView.getContext();
-            itemView.setOnClickListener(this);
-        }
-
-        void bindMovie(Movie movie) {
-            StringBuilder releaseText = new StringBuilder().append(mContext.getResources().getString(R.string.Release_Date_Title));
-            releaseText.append(movie.getReleaseDate());
-
-            movieTitle.setText(movie.getOriginalTitle());
-            releaseDate.setText(releaseText);
-            Picasso.Builder builder = new Picasso.Builder(context);
-            builder.downloader(new OkHttp3Downloader(context));
-            builder.build().load(context.getResources().getString(R.string.IMAGE_BASE_URL) + movie.getPosterPath())
-                    .placeholder((R.drawable.gradient_background))
-                    .error(R.drawable.ic_launcher_background)
-                    .into(coverImage);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Movie movie = dataList.get(getAdapterPosition());
-            Intent intent = new Intent(context, DetailsActivity.class);
-            intent.putExtra(SELECTED_MOVIE_TO_SEE_DETAILS, movie);
-            v.getContext().startActivity(intent);
-        }
+    @Override
+    public void onClick(View view, int position) {
+        Movie movie = dataList.get(position);
+        Intent intent = new Intent(context, DetailsActivity.class);
+        intent.putExtra(SELECTED_MOVIE_TO_SEE_DETAILS, movie);
+        context.startActivity(intent);
     }
 }
 

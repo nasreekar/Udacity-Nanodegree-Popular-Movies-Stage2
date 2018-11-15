@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -141,7 +140,7 @@ public class DetailsActivity extends AppCompatActivity {
             selectedMovie.setFavorite(false);
             favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
             viewModel.removeMovieFromFavorites(selectedMovie.getMovieId());
-            Toast.makeText(this, R.string.Favorite_Removed, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.Favorite_Removed), Toast.LENGTH_SHORT).show();
             navigateToFavoritesMovieScreen();
         } else {
             selectedMovie.setFavorite(true);
@@ -151,7 +150,7 @@ public class DetailsActivity extends AppCompatActivity {
                     selectedMovie.getVoteAverage(), selectedMovie.getBackdropPath(), selectedMovie.getPosterPath(),
                     selectedMovie.isFavorite());
             viewModel.addMovieToFavorites(favMovie);
-            Toast.makeText(this, R.string.Favorite_Added, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.Favorite_Added), Toast.LENGTH_SHORT).show();
             navigateToFavoritesMovieScreen();
         }
     }
@@ -191,7 +190,7 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.i(getString(R.string.Network_Status), getString(R.string.Not_Available_Text));
+            Toast.makeText(DetailsActivity.this, getResources().getString(R.string.Network_Status_Not_Available), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -220,11 +219,11 @@ public class DetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<MovieReviews> call, Throwable t) {
-                    Toast.makeText(DetailsActivity.this, R.string.Something_wrong_text, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Log.i(getString(R.string.Network_Status), getString(R.string.Not_Available_Text));
+            Toast.makeText(DetailsActivity.this, getResources().getString(R.string.Network_Status_Not_Available), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -257,7 +256,7 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.i(getString(R.string.Network_Status), getString(R.string.Not_Available_Text));
+            Toast.makeText(DetailsActivity.this, getResources().getString(R.string.Network_Status_Not_Available), Toast.LENGTH_SHORT).show();
         }
     }
 

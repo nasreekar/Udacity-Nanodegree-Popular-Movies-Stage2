@@ -34,7 +34,7 @@ android {
         dev {
             applicationIdSuffix '.dev'
             dimension "default"
-            resValue 'string', API_KEY, '"API_KEY"'
+            resValue 'string', API_KEY, '"2abea955e719b669f2d63b54e0bf348e"'
             resValue 'string', IMAGE_BASE_URL, '"https://image.tmdb.org/t/p/w500/"'
             resValue 'string', LANGUAGE, '"en-US"'
             resValue 'string', YOUTUBE_BASE_VIDEO_URL, '"https://youtube.com/watch?v="'
