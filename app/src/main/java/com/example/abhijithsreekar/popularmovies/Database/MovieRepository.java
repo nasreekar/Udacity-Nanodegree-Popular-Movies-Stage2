@@ -25,15 +25,21 @@ public class MovieRepository {
         return movies;
     }
 
-    public void updateFavoriteMovie(Movie movie) {
-        appExecutors.getDiskIO().execute(() -> movieDao.updateFavoriteMovie(movie));
+    public boolean isFavorite(int movieId) {
+        return movieDao.isFavorite(movieId);
+    }
+
+    public void updateFavoriteMovie(int movieId, boolean isFavorite) {
+        appExecutors.getDiskIO().execute(() -> {
+            movieDao.updateFavoriteMovie(movieId, isFavorite);
+        });
     }
 
     public void addMovieToFavorites(Movie movie) {
         appExecutors.getDiskIO().execute(() -> movieDao.insertFavoriteMovie(movie));
     }
 
-    public void deleteFavoriteMovie(int id) {
-        appExecutors.getDiskIO().execute(() -> movieDao.deleteFavoriteMovie(id));
+    public void deleteFavoriteMovie(Movie movie) {
+        appExecutors.getDiskIO().execute(() -> movieDao.deleteFavoriteMovie(movie));
     }
 }

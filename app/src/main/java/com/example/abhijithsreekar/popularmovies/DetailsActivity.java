@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomCastAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomReviewsAdapter;
 import com.example.abhijithsreekar.popularmovies.Adapters.CustomTrailerAdapter;
+import com.example.abhijithsreekar.popularmovies.Database.MovieDatabase;
 import com.example.abhijithsreekar.popularmovies.Interface.MovieInterface;
 import com.example.abhijithsreekar.popularmovies.Models.Cast;
 import com.example.abhijithsreekar.popularmovies.Models.Movie;
@@ -25,6 +27,7 @@ import com.example.abhijithsreekar.popularmovies.Models.MovieTrailer;
 import com.example.abhijithsreekar.popularmovies.Models.Reviews;
 import com.example.abhijithsreekar.popularmovies.Models.Trailer;
 import com.example.abhijithsreekar.popularmovies.Network.APIClient;
+import com.example.abhijithsreekar.popularmovies.Utils.AppExecutors;
 import com.example.abhijithsreekar.popularmovies.Utils.MovieUtils;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
@@ -43,11 +46,16 @@ import static com.example.abhijithsreekar.popularmovies.Utils.Constants.SELECTED
 
 public class DetailsActivity extends AppCompatActivity {
 
+    private static final String TAG = DetailsActivity.class.getSimpleName();
+
     private static Retrofit retrofit;
     private static String API_KEY;
     public List<Trailer> trailers;
     public List<Reviews> reviews;
     public List<Cast> cast;
+    private boolean isFavorite;
+    private int movieId;
+    private Movie movie;
 
     @BindView(R.id.iv_details_moviePoster)
     ImageView moviePoster;
@@ -97,62 +105,95 @@ public class DetailsActivity extends AppCompatActivity {
         API_KEY = getResources().getString(R.string.API_KEY);
 
         ButterKnife.bind(this);
+        MovieInterface movieService = APIClient.getRetrofitInstance().create(MovieInterface.class);
         viewModel = ViewModelProviders.of(this).get(DetailsActivityViewModel.class);
 
-        bindSelectedMovieData();
+        favBtn.setOnClickListener(v -> onFavButtonClicked());
+
+        if (getIntent() != null) {
+            if (getIntent().hasExtra(SELECTED_MOVIE_TO_SEE_DETAILS)) {
+                movie = getIntent().getParcelableExtra(SELECTED_MOVIE_TO_SEE_DETAILS);
+                movieId = movie.getMovieId();
+                AppExecutors.getExecutorInstance().getDiskIO().execute(() -> {
+                    isFavorite = viewModel.isFavorite(movieId);
+                    if (isFavorite) {
+                        movie = MovieDatabase.getInstance(this).movieDao().getMovie(movieId);
+                        runOnUiThread(() -> favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected)));
+                    } else {
+                        runOnUiThread(() -> favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel)));
+                    }
+                });
+            }
+        }
+
+        getSelectedMovieDetails(movieService);
+
     }
 
-    private void bindSelectedMovieData() {
-        Intent intent = getIntent();
-        Movie selectedMovie = intent.getParcelableExtra(SELECTED_MOVIE_TO_SEE_DETAILS);
+    private void getSelectedMovieDetails(MovieInterface client) {
+        if (movieId != 0) {
+            Call<Movie> detailResultsCall = client.getMovieDetails(movieId, API_KEY);
+            detailResultsCall.enqueue(new Callback<Movie>() {
+                @Override
+                public void onResponse(@NonNull Call<Movie> call, @NonNull Response<Movie> response) {
+                    if (response.body() == null) {
+                        return;
+                    }
 
-        getMovieTrailers(selectedMovie.getMovieId());
-        getMovieReviews(selectedMovie.getMovieId());
-        getMovieCast(selectedMovie.getMovieId());
+                    movieTitle.setText(response.body().getTitle());
+                    movieLanguage.setText(new StringBuilder(getString(R.string.Language_Title)).append(response.body().getOriginalLanguage()));
+                    if (response.body().getOverview() != null && !response.body().getOverview().isEmpty()) {
+                        moviePlot.setText(response.body().getOverview());
+                    } else {
+                        moviePlot.setText(getResources().getString(R.string.plotNotAvailable));
+                    }
+                    movieReleaseDate.setText(new StringBuilder(getString(R.string.Release_Date_Title)).append(response.body().getReleaseDate()));
+                    movieVoteAverage.setText(new StringBuilder(getString(R.string.Rating_Title)).append(response.body().getVoteAverage()));
 
-        movieTitle.setText(selectedMovie.getTitle());
-        movieLanguage.setText(new StringBuilder(getString(R.string.Language_Title)).append(selectedMovie.getOriginalLanguage()));
-        if (selectedMovie.getOverview() != null && !selectedMovie.getOverview().isEmpty()) {
-            moviePlot.setText(selectedMovie.getOverview());
-        } else {
-            moviePlot.setText(getResources().getString(R.string.plotNotAvailable));
+                    Picasso.Builder builder = new Picasso.Builder(getApplicationContext());
+                    builder.downloader(new OkHttp3Downloader(getApplicationContext()));
+                    builder.build().load(getResources().getString(R.string.IMAGE_BASE_URL) + response.body().getBackdropPath())
+                            .placeholder((R.drawable.gradient_background))
+                            .error(R.drawable.ic_launcher_background)
+                            .into(moviePoster);
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Movie> call, @NonNull Throwable t) {
+                    if (movie != null) {
+                        Log.d(TAG, "Movie already set by favorites");
+                    } else {
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            getMovieTrailers(movieId);
+            getMovieReviews(movieId);
+            getMovieCast(movieId);
         }
-        movieReleaseDate.setText(new StringBuilder(getString(R.string.Release_Date_Title)).append(selectedMovie.getReleaseDate()));
-        movieVoteAverage.setText(new StringBuilder(getString(R.string.Rating_Title)).append(selectedMovie.getVoteAverage()));
-
-        Picasso.Builder builder = new Picasso.Builder(this);
-        builder.downloader(new OkHttp3Downloader(this));
-        builder.build().load(this.getResources().getString(R.string.IMAGE_BASE_URL) + selectedMovie.getBackdropPath())
-                .placeholder((R.drawable.gradient_background))
-                .error(R.drawable.ic_launcher_background)
-                .into(moviePoster);
-
-        if (selectedMovie.isFavorite()) {
-            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
-        } else {
-            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
-        }
-        favBtn.setOnClickListener(v -> onFavButtonClicked(selectedMovie));
     }
 
-    private void onFavButtonClicked(Movie selectedMovie) {
-        if (selectedMovie.isFavorite()) {
-            selectedMovie.setFavorite(false);
-            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
-            viewModel.removeMovieFromFavorites(selectedMovie.getMovieId());
-            Toast.makeText(this, getResources().getString(R.string.Favorite_Removed), Toast.LENGTH_SHORT).show();
-            navigateToFavoritesMovieScreen();
-        } else {
-            selectedMovie.setFavorite(true);
-            favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
-            Movie favMovie = new Movie(selectedMovie.getMovieId(), selectedMovie.getTitle(), selectedMovie.getOriginalTitle(),
-                    selectedMovie.getOriginalLanguage(), selectedMovie.getOverview(), selectedMovie.getReleaseDate(),
-                    selectedMovie.getVoteAverage(), selectedMovie.getBackdropPath(), selectedMovie.getPosterPath(),
-                    selectedMovie.isFavorite());
-            viewModel.addMovieToFavorites(favMovie);
-            Toast.makeText(this, getResources().getString(R.string.Favorite_Added), Toast.LENGTH_SHORT).show();
-            navigateToFavoritesMovieScreen();
-        }
+    private void onFavButtonClicked() {
+        AppExecutors.getExecutorInstance().getDiskIO().execute(() -> {
+            boolean isFavorite = viewModel.isFavorite(movieId);
+            if (isFavorite) {
+                viewModel.removeMovieFromFavorites(movie);
+                runOnUiThread(() -> {
+                    favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_unsel));
+                    Toast.makeText(this, getResources().getString(R.string.Favorite_Removed), Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                viewModel.addMovieToFavorites(movie);
+                runOnUiThread(() -> {
+                    Toast.makeText(this, getResources().getString(R.string.Favorite_Added), Toast.LENGTH_SHORT).show();
+                    favBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.favorite_selected));
+                });
+            }
+            viewModel.updatFavoriteMovie(movieId, !isFavorite);
+           // navigateToFavoritesMovieScreen();
+            finish();
+        });
     }
 
     private void navigateToFavoritesMovieScreen() {

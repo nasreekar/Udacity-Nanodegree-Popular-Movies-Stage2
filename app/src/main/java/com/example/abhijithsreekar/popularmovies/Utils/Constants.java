@@ -8,6 +8,9 @@ public final class Constants {
     public static final String ACTIVITY_TITLE = "ACTIVITY_TITLE";
     public static final String SELECTED_MOVIE_TO_SEE_DETAILS = "SelectedMovie";
 
+    public static final String MOST_POPULAR_OPTION_CHECKED = "MOST_POPULAR_OPTION_CHECKED";
+    public static final String TOP_RATED_OPTION_CHECKED = "TOP_RATED_OPTION_CHECKED";
+
     // Detail Activity
     public static final String FAV_MOVIE_KEY = "FromFavMovie";
 

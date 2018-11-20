@@ -15,12 +15,19 @@ public class DetailsActivityViewModel extends AndroidViewModel {
         super(application);
         movieRepository = new MovieRepository(application);
     }
+    public boolean isFavorite(int movieId) {
+        return movieRepository.isFavorite(movieId);
+    }
 
     public void addMovieToFavorites(Movie movie) {
         movieRepository.addMovieToFavorites(movie);
     }
 
-    public void removeMovieFromFavorites(int id) {
-        movieRepository.deleteFavoriteMovie(id);
+    public void removeMovieFromFavorites(Movie movie) {
+        movieRepository.deleteFavoriteMovie(movie);
+    }
+
+    public void updatFavoriteMovie(int movieId, boolean isFavorite) {
+        movieRepository.updateFavoriteMovie(movieId, isFavorite);
     }
 }

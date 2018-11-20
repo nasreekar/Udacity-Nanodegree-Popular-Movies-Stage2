@@ -20,6 +20,7 @@ import com.example.abhijithsreekar.popularmovies.Network.APIClient;
 import com.example.abhijithsreekar.popularmovies.Utils.MovieUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,9 +29,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.example.abhijithsreekar.popularmovies.Utils.Constants.ACTIVITY_TITLE;
-import static com.example.abhijithsreekar.popularmovies.Utils.Constants.FAV_MOVIE_KEY;
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.MOST_POPULAR_OPTION_CHECKED;
 import static com.example.abhijithsreekar.popularmovies.Utils.Constants.MOVIES_LIST;
 import static com.example.abhijithsreekar.popularmovies.Utils.Constants.RECYCLER_VIEW_LAYOUT_MANAGER_STATE;
+import static com.example.abhijithsreekar.popularmovies.Utils.Constants.TOP_RATED_OPTION_CHECKED;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
     private CustomMoviesAdapter adapter;
     private MovieInterface movieService;
     private static String actionBarTitle;
+    private boolean mostPopularOptionChecked = true;
+    private boolean topRatedOptionChecked = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +67,24 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new CustomMoviesAdapter(this, movies, rvMain);
         rvMain.setAdapter(adapter);
-
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+
+        viewModel.getFavoriteMovies().observe(this, favorites -> {
+            if (favorites != null && !mostPopularOptionChecked && !topRatedOptionChecked) {
+                if (movies == null) {
+                    movies = new ArrayList<>();
+                } else {
+                    adapter.clear();
+                }
+                adapter.addAll(favorites);
+
+                if (movies.size() == 0) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getApplicationContext(), R.string.FavoritesNotFound, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
 
         movieService = APIClient.getRetrofitInstance().create(MovieInterface.class);
 
@@ -75,11 +96,23 @@ public class MainActivity extends AppCompatActivity {
                 adapter.clear();
                 adapter.setData(movies);
             }
+
+            if (savedInstanceState.containsKey(MOST_POPULAR_OPTION_CHECKED)) {
+                mostPopularOptionChecked = savedInstanceState.getBoolean(MOST_POPULAR_OPTION_CHECKED);
+            }
+            if (savedInstanceState.containsKey(TOP_RATED_OPTION_CHECKED)) {
+                topRatedOptionChecked = savedInstanceState.getBoolean(TOP_RATED_OPTION_CHECKED);
+            }
         }
 
         if (savedInstanceState == null) {
-            progressBar.setVisibility(View.VISIBLE);
-            getPopularMovies();
+            if (mostPopularOptionChecked) {
+                progressBar.setVisibility(View.VISIBLE);
+                getPopularMovies();
+            } else if (topRatedOptionChecked) {
+                progressBar.setVisibility(View.VISIBLE);
+                getTopRatedMovies();
+            }
         }
     }
 
@@ -103,12 +136,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<MovieResponse> call, Throwable t) {
                     progressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(MainActivity.this,  getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
             progressBar.setVisibility(View.INVISIBLE);
-            Toast.makeText(MainActivity.this,  getResources().getString(R.string.Network_Status_Not_Available), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, getResources().getString(R.string.Network_Status_Not_Available), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -132,26 +165,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<MovieResponse> call, Throwable t) {
                     progressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(MainActivity.this,  getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.Something_wrong_text), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
             Log.i("Network Connection Status", "Not available");
         }
-    }
-
-    private void getFavoriteMovies() {
-        viewModel.getFavoriteMovies().observe(this, favoriteMovies -> {
-            if (favoriteMovies != null && favoriteMovies.size() > 0) {
-                progressBar.setVisibility(View.INVISIBLE);
-                Log.d(TAG, "updating list of movies from Live data in ViewModel");
-                adapter.addAll(favoriteMovies);
-            } else {
-                progressBar.setVisibility(View.INVISIBLE);
-                Toast.makeText(getApplicationContext(), "No favorite Movies Found", Toast.LENGTH_SHORT).show();
-            }
-        });
-
     }
 
     @Override
@@ -166,12 +185,16 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.topRated:
                 progressBar.setVisibility(View.VISIBLE);
+                mostPopularOptionChecked = false;
+                topRatedOptionChecked = true;
                 adapter.clear();
                 getTopRatedMovies();
                 setTitle(R.string.toprated_movies);
                 actionBarTitle = getResources().getString(R.string.toprated_movies);
                 break;
             case R.id.popular:
+                mostPopularOptionChecked = true;
+                topRatedOptionChecked = false;
                 progressBar.setVisibility(View.VISIBLE);
                 adapter.clear();
                 getPopularMovies();
@@ -180,11 +203,20 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.favorite:
+                mostPopularOptionChecked = false;
+                topRatedOptionChecked = false;
                 progressBar.setVisibility(View.VISIBLE);
                 adapter.clear();
-                getFavoriteMovies();
                 setTitle(R.string.favorite_movies);
                 actionBarTitle = getResources().getString(R.string.favorite_movies);
+                List<Movie> favoriteMovies = viewModel.getFavoriteMovies().getValue();
+                if (favoriteMovies != null && favoriteMovies.size() > 0) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    adapter.addAll(favoriteMovies);
+                } else {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getApplicationContext(), R.string.FavoritesNotFound, Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -192,22 +224,24 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(MOST_POPULAR_OPTION_CHECKED, mostPopularOptionChecked);
+        outState.putBoolean(TOP_RATED_OPTION_CHECKED, topRatedOptionChecked);
         outState.putParcelableArrayList(MOVIES_LIST, movies);
         outState.putString(ACTIVITY_TITLE, actionBarTitle);
         outState.putParcelable(RECYCLER_VIEW_LAYOUT_MANAGER_STATE, rvMain.getLayoutManager().onSaveInstanceState());
         super.onSaveInstanceState(outState);
     }
 
-    @Override
+   /* @Override
     protected void onResume() {
         super.onResume();
-        if (getIntent().getExtras() != null) {
+        if (getIntent().getExtras() != null && movies.size() == 0) {
             if (getIntent().getExtras().getBoolean(FAV_MOVIE_KEY)) {
                 adapter.clear();
                 setTitle(R.string.favorite_movies);
                 getFavoriteMovies();
             }
         }
-    }
+    }*/
 
 }
